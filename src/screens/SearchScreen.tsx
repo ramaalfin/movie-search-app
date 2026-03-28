@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -8,15 +8,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import MovieCard from '../components/MovieCard';
 import EmptyState from '../components/EmptyState';
 import useMovieSearch from '../hooks/useMovieSearch';
 import useRecentSearches from '../hooks/useRecentSearches';
 import theme from '../theme';
-import type {Movie} from '../types/movie';
-import type {RootStackParamList} from '../navigation/RootNavigator';
+import type { Movie } from '../types/movie';
+import type { RootStackParamList } from '../navigation/RootNavigator';
+import useAppTheme from '../hooks/useAppTheme';
 
 type SearchScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -24,17 +25,19 @@ type SearchScreenNavigationProp = NativeStackNavigationProp<
 >;
 
 const SearchScreen: React.FC = () => {
+  const theme = useAppTheme();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  
-  const {data, isLoading} = useMovieSearch(searchQuery);
-  const {searches, addSearch, clearAll} = useRecentSearches();
+
+  const { data, isLoading } = useMovieSearch(searchQuery);
+  const { searches, addSearch, clearAll } = useRecentSearches();
   const navigation = useNavigation<SearchScreenNavigationProp>();
 
   const handleMoviePress = (movie: Movie) => {
-    navigation.navigate('Detail', {movieId: movie.id});
+    navigation.navigate('Detail', { movieId: movie.id });
   };
 
   const handleSearch = () => {
@@ -67,6 +70,76 @@ const SearchScreen: React.FC = () => {
   const showResults = searchQuery.length > 0 && hasSearched;
   const showEmptyState = showResults && !isLoading && data?.results.length === 0;
   const showLoading = isLoading && hasSearched;
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: theme.spacing.lg,
+      paddingVertical: theme.spacing.md,
+      backgroundColor: theme.colors.card,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    searchInput: {
+      flex: 1,
+      height: 40,
+      backgroundColor: theme.colors.surface,
+      borderRadius: theme.borderRadius.md,
+      paddingHorizontal: theme.spacing.md,
+      ...theme.typography.body,
+      color: theme.colors.text.primary,
+    },
+    clearButton: {
+      marginLeft: theme.spacing.sm,
+      padding: theme.spacing.sm,
+    },
+    clearButtonText: {
+      ...theme.typography.body,
+      color: theme.colors.text.secondary,
+      fontSize: 18,
+    },
+    recentContainer: {
+      backgroundColor: theme.colors.card,
+      paddingHorizontal: theme.spacing.lg,
+      paddingVertical: theme.spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    recentHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: theme.spacing.sm,
+    },
+    recentTitle: {
+      ...theme.typography.label,
+      fontWeight: '600',
+    },
+    clearText: {
+      ...theme.typography.caption,
+      color: theme.colors.secondary,
+    },
+    recentItem: {
+      paddingVertical: theme.spacing.sm,
+    },
+    recentItemText: {
+      ...theme.typography.body,
+      color: theme.colors.text.primary,
+    },
+    center: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    list: {
+      paddingVertical: theme.spacing.sm,
+    },
+  });
 
   return (
     <View style={styles.container}>
@@ -126,7 +199,7 @@ const SearchScreen: React.FC = () => {
         <FlatList
           data={data.results}
           keyExtractor={item => item.id.toString()}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <MovieCard movie={item} onPress={handleMoviePress} />
           )}
           contentContainerStyle={styles.list}
@@ -142,75 +215,5 @@ const SearchScreen: React.FC = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-    backgroundColor: theme.colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  searchInput: {
-    flex: 1,
-    height: 40,
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.md,
-    paddingHorizontal: theme.spacing.md,
-    ...theme.typography.body,
-    color: theme.colors.text.primary,
-  },
-  clearButton: {
-    marginLeft: theme.spacing.sm,
-    padding: theme.spacing.sm,
-  },
-  clearButtonText: {
-    ...theme.typography.body,
-    color: theme.colors.text.secondary,
-    fontSize: 18,
-  },
-  recentContainer: {
-    backgroundColor: theme.colors.card,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  recentHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: theme.spacing.sm,
-  },
-  recentTitle: {
-    ...theme.typography.label,
-    fontWeight: '600',
-  },
-  clearText: {
-    ...theme.typography.caption,
-    color: theme.colors.secondary,
-  },
-  recentItem: {
-    paddingVertical: theme.spacing.sm,
-  },
-  recentItemText: {
-    ...theme.typography.body,
-    color: theme.colors.text.primary,
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  list: {
-    paddingVertical: theme.spacing.sm,
-  },
-});
 
 export default SearchScreen;

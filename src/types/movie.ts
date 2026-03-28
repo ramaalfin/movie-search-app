@@ -65,3 +65,12 @@ export interface ReviewsResponse {
   total_pages: number;
   total_results: number;
 }
+
+export interface UserReview {
+  id: string;
+  movieId: number;
+  rating: number;
+  title: string;
+  content: string;
+  createdAt: string;
+}

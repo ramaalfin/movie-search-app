@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -21,7 +21,10 @@ import useFavoritesStore from '../stores/useFavoritesStore';
 import RatingStars from '../components/RatingStars';
 import CastCard from '../components/CastCard';
 import ReviewCard from '../components/ReviewCard';
+import ReviewModal from '../components/ReviewModal';
+import UserReviewCard from '../components/UserReviewCard';
 import {formatDate, formatRuntime} from '../utils/formatters';
+import {getUserReviews, deleteUserReview} from '../utils/storage';
 
 type DetailScreenProps = NativeStackScreenProps<RootStackParamList, 'Detail'>;
 
@@ -32,12 +35,26 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route}) => {
   const {data: credits} = useMovieCredits(movieId);
   const {data: reviews} = useMovieReviews(movieId);
 
+  const [userReviews, setUserReviews] = useState<any[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
+
   const {isFavorite, addFavorite, removeFavorite, loadFavorites} =
     useFavoritesStore();
 
   useEffect(() => {
     loadFavorites();
+    loadUserReviews();
   }, [loadFavorites]);
+
+  const loadUserReviews = async () => {
+    const reviews = await getUserReviews(movieId);
+    setUserReviews(reviews);
+  };
+
+  const handleDeleteUserReview = async (reviewId: string) => {
+    await deleteUserReview(movieId, reviewId);
+    loadUserReviews();
+  };
 
   const handleFavoriteToggle = () => {
     if (!movie) return;
@@ -145,10 +162,33 @@ const DetailScreen: React.FC<DetailScreenProps> = ({route}) => {
           </View>
         )}
 
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>My Reviews</Text>
+          <TouchableOpacity
+            style={styles.writeReviewButton}
+            onPress={() => setModalVisible(true)}>
+            <Text style={styles.writeReviewText}>✍️ Write a Review</Text>
+          </TouchableOpacity>
+          {userReviews.map(review => (
+            <UserReviewCard
+              key={review.id}
+              review={review}
+              onDelete={() => handleDeleteUserReview(review.id)}
+            />
+          ))}
+        </View>
+
+        <ReviewModal
+          visible={modalVisible}
+          movieId={movieId}
+          onClose={() => setModalVisible(false)}
+          onReviewAdded={loadUserReviews}
+        />
+
         {movieReviews.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>
-              Reviews ({movieReviews.length})
+              TMDB Reviews ({movieReviews.length})
             </Text>
             {movieReviews.map(review => (
               <ReviewCard key={review.id} review={review} />
@@ -245,6 +285,18 @@ const styles = StyleSheet.create({
   sectionTitle: {
     ...theme.typography.subheading,
     marginBottom: theme.spacing.md,
+  },
+  writeReviewButton: {
+    backgroundColor: theme.colors.secondary,
+    padding: theme.spacing.lg,
+    borderRadius: theme.borderRadius.md,
+    alignItems: 'center',
+    marginBottom: theme.spacing.lg,
+  },
+  writeReviewText: {
+    ...theme.typography.body,
+    color: theme.colors.text.inverse,
+    fontWeight: '600',
   },
   overview: {
     ...theme.typography.body,

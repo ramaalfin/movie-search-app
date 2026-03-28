@@ -7,13 +7,13 @@ import {
   Text,
   View,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import MovieCard from '../components/MovieCard';
 import useInfiniteMovies from '../hooks/useInfiniteMovies';
-import theme from '../theme';
-import type {Movie} from '../types/movie';
-import type {RootStackParamList} from '../navigation/RootNavigator';
+import type { Movie } from '../types/movie';
+import type { RootStackParamList } from '../navigation/RootNavigator';
+import useAppTheme from '../hooks/useAppTheme';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -33,8 +33,36 @@ const HomeScreen: React.FC = () => {
   } = useInfiniteMovies();
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
+  const theme = useAppTheme();
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    center: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme.colors.background,
+    },
+    list: {
+      paddingVertical: theme.spacing.sm,
+    },
+    footer: {
+      paddingVertical: theme.spacing.lg,
+      alignItems: 'center',
+    },
+    errorText: {
+      ...theme.typography.body,
+      color: theme.colors.error,
+    },
+  });
+
+  console.log(theme);
+
   const handleMoviePress = (movie: Movie) => {
-    navigation.navigate('Detail', {movieId: movie.id});
+    navigation.navigate('Detail', { movieId: movie.id });
   };
 
   const movies = data?.pages.flatMap(page => page.results) ?? [];
@@ -75,7 +103,7 @@ const HomeScreen: React.FC = () => {
       <FlatList
         data={movies}
         keyExtractor={item => item.id.toString()}
-        renderItem={({item}) => (
+        renderItem={({ item }) => (
           <MovieCard movie={item} onPress={handleMoviePress} />
         )}
         contentContainerStyle={styles.list}
@@ -94,29 +122,5 @@ const HomeScreen: React.FC = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: theme.colors.background,
-  },
-  list: {
-    paddingVertical: theme.spacing.sm,
-  },
-  footer: {
-    paddingVertical: theme.spacing.lg,
-    alignItems: 'center',
-  },
-  errorText: {
-    ...theme.typography.body,
-    color: theme.colors.error,
-  },
-});
 
 export default HomeScreen;

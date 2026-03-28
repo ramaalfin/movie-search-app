@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { TMDB_API_KEY } from '@env';
+import useSettingsStore from '../stores/useSettingsStore';
 
 const apiClient = axios.create({
   baseURL: 'https://api.themoviedb.org/3',
@@ -9,6 +10,19 @@ const apiClient = axios.create({
   },
   timeout: 10000,
 });
+
+apiClient.interceptors.request.use(
+  config => {
+    const { language } = useSettingsStore.getState();
+    if (config.params) {
+      config.params.language = language;
+    }
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  },
+);
 
 apiClient.interceptors.response.use(
   response => response,

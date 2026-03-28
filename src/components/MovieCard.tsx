@@ -1,19 +1,53 @@
 import React from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import theme from '../theme';
-import type {Movie} from '../types/movie';
+import type { Movie } from '../types/movie';
 import RatingStars from './RatingStars';
-import {formatDate} from '../utils/formatters';
+import { formatDate } from '../utils/formatters';
+import useAppTheme from '../hooks/useAppTheme';
 
 interface MovieCardProps {
   movie: Movie;
   onPress: (movie: Movie) => void;
 }
 
-const MovieCard: React.FC<MovieCardProps> = ({movie, onPress}) => {
+const MovieCard: React.FC<MovieCardProps> = ({ movie, onPress }) => {
   const posterUrl = movie.poster_path
     ? `https://image.tmdb.org/t/p/w342${movie.poster_path}`
     : null;
+
+  const theme = useAppTheme();
+
+  const styles = StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      backgroundColor: theme.colors.card,
+      borderRadius: theme.borderRadius.md,
+      marginHorizontal: theme.spacing.lg,
+      marginVertical: theme.spacing.sm,
+      padding: theme.spacing.md,
+      ...theme.shadows.card,
+    },
+    poster: {
+      width: 80,
+      height: 120,
+      borderRadius: theme.borderRadius.sm,
+      backgroundColor: theme.colors.skeleton,
+    },
+    info: {
+      flex: 1,
+      marginLeft: theme.spacing.md,
+      justifyContent: 'center',
+    },
+    title: {
+      ...theme.typography.subheading,
+      marginBottom: theme.spacing.xs,
+    },
+    releaseDate: {
+      ...theme.typography.caption,
+      marginTop: theme.spacing.xs,
+    },
+  });
 
   return (
     <TouchableOpacity
@@ -21,7 +55,7 @@ const MovieCard: React.FC<MovieCardProps> = ({movie, onPress}) => {
       onPress={() => onPress(movie)}
       activeOpacity={0.7}>
       <Image
-        source={posterUrl ? {uri: posterUrl} : undefined}
+        source={posterUrl ? { uri: posterUrl } : undefined}
         style={styles.poster}
         resizeMode="cover"
       />
@@ -35,36 +69,5 @@ const MovieCard: React.FC<MovieCardProps> = ({movie, onPress}) => {
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.md,
-    marginHorizontal: theme.spacing.lg,
-    marginVertical: theme.spacing.sm,
-    padding: theme.spacing.md,
-    ...theme.shadows.card,
-  },
-  poster: {
-    width: 80,
-    height: 120,
-    borderRadius: theme.borderRadius.sm,
-    backgroundColor: theme.colors.skeleton,
-  },
-  info: {
-    flex: 1,
-    marginLeft: theme.spacing.md,
-    justifyContent: 'center',
-  },
-  title: {
-    ...theme.typography.subheading,
-    marginBottom: theme.spacing.xs,
-  },
-  releaseDate: {
-    ...theme.typography.caption,
-    marginTop: theme.spacing.xs,
-  },
-});
 
 export default MovieCard;
